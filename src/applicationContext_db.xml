@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:aop="http://www.springframework.org/schema/aop" 
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			 http://www.springframework.org/schema/beans/spring-beans.xsd
+			 http://www.springframework.org/schema/context
+			 http://www.springframework.org/schema/context/spring-context.xsd
+			 http://www.springframework.org/schema/tx
+			 http://www.springframework.org/schema/tx/spring-tx.xsd
+			 http://www.springframework.org/schema/aop
+			 http://www.springframework.org/schema/aop/spring-aop.xsd">
+		<!--  -->
+		<context:annotation-config></context:annotation-config>
+		<!--  -->
+		<context:component-scan base-package="com.yc.project.*"></context:component-scan>
+		<!--  -->
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+			<!-- 配置4个参数 -->
+			<property name="driverClassName" value="${driverName}"></property>
+			<property name="url" value="${url}"></property>
+			<property name="username" value="${loginname}"></property>
+			<property name="password" value="${password}"></property>
+		</bean>
+		<context:property-placeholder location="classpath:db.properties"/>
+		
+		<!--  -->
+		<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+			<!-- 注入数据源 -->
+			<property name="dataSource" ref="dataSource"></property>
+		</bean>
+		<!-- 基于注解的配置 -->
+		<tx:annotation-driven transaction-manager="transactionManager"/> 
+
+		<!-- 配置SqlSessionFactory -->
+		<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<!-- 依赖于dataSource -->
+			<property name="dataSource" ref="dataSource"></property>
+			<!-- 下面可以接着写MyBatis全部配置，现只指定mybatis配置文件 -->
+			<!-- mybatis配置文件 -->
+			<property name="configLocation" value="classpath:mybatis_conf.xml"></property>
+		</bean>
+		
+		<!-- 配置UserDao -->
+		<!-- <bean id="jobDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+			依赖SqlSessionFactory,或注入SqlSessionFactory对象
+			<property name="sqlSessionFactory" ref="sqlSessionFactoryBean"></property>	
+			说明接口名字
+			<property name="mapperInterface" value="com.yc.pms.dao.JobDao"></property>
+		</bean>
+		<bean id="functionDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+			依赖SqlSessionFactory,或注入SqlSessionFactory对象
+			<property name="sqlSessionFactory" ref="sqlSessionFactoryBean"></property>	
+			说明接口名字
+			<property name="mapperInterface" value="com.yc.pms.dao.FunctionDao"></property>
+		</bean>
+		<bean id="roleDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+			依赖SqlSessionFactory,或注入SqlSessionFactory对象
+			<property name="sqlSessionFactory" ref="sqlSessionFactoryBean"></property>	
+			说明接口名字
+			<property name="mapperInterface" value="com.yc.pms.dao.RoleDao"></property>
+		</bean>
+		<bean id="userDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+			依赖SqlSessionFactory,或注入SqlSessionFactory对象
+			<property name="sqlSessionFactory" ref="sqlSessionFactoryBean"></property>	
+			说明接口名字
+			<property name="mapperInterface" value="com.yc.pms.dao.UserDao"></property>
+		</bean> -->
+		<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="sqlSessionFactoryBeanName"  value="sqlSessionFactoryBean"></property>
+			<property name="basePackage" value="com.yc.project.dao"></property>
+		</bean>
+		
+		<!-- 事务的配置 -->
+		<tx:advice id="txAdvice" transaction-manager="transactionManager">
+			<tx:attributes>
+				<!-- get方法只读 -->
+				<tx:method name="get*" read-only="true"/>
+				<!-- 其他方法非只读 -->
+				<tx:method name="*" rollback-for="Exception"/>
+			</tx:attributes>
+		</tx:advice>
+		<!-- 配置Aspect -->
+		<aop:config>
+			<!-- 定义切点 -->
+			<aop:pointcut expression="execution(* com.yc.project.service.*.*(..))" id="serviceOperation"/>
+			<aop:advisor  advice-ref="txAdvice" pointcut-ref="serviceOperation"/>
+		</aop:config>
+</beans>
+
+

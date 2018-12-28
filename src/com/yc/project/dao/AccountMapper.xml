@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.project.dao.AccountDao">
+	<!-- 定义SQL语句 -->
+	<sql id="account">
+		select
+			a.id as a_id ,a.adate as a_date ,a.amount as a_amount,a.remark as a_remark,
+			u.id as u_id ,u.name  as u_name ,u.realname u_realName,
+			i.id as i_id ,i.name  as i_name ,i.type as i_type,
+			p.id as i_pid,p.name  as i_pname
+		from accounts a
+			inner join users u
+				on (a.user_id = u.id and u.flag = 1)
+			inner join items i
+				on (a.item_id = i.id and i.flag = 1)
+			inner join items p
+				on (i.pid = p.id and p.flag = 1)
+	</sql>
+
+    <sql id="search">
+		and (u.realname like concat('%',#{search},'%') or i.name like concat('%',#{search},'%') or p.name like concat('%',#{search},'%') )
+	</sql>
+
+	<select id="getPageAccount" resultType="com.yc.project.entity.Account" resultMap="accountResultMap">
+		<include refid="account" ></include>
+		where a.flag = 1
+          <include refid="search" ></include>
+        order by a.adate desc
+		limit #{start},#{len}
+	</select>
+
+    <select id="getItemCount" resultType="Integer">
+        select count(a_id) as num from (
+        <include refid="account" ></include>
+        where a.flag = 1
+        <include refid="search" ></include>
+        ) t
+    </select>
+
+    <select id="getAccountById" resultType="com.yc.project.entity.Account" resultMap="accountResultMap">
+        <include refid="account" ></include>
+        where a.flag = 1 and a.id = #{id}
+    </select>
+
+
+    <resultMap id="accountResultMap" type="com.yc.project.entity.Account">
+        <id column="a_id" property="id" />
+        <result column="a_date" property="date" />
+        <result column="a_amount" property="amount" />
+        <result column="a_remark" property="remark" />
+        <association  column="u_id"  property="user" javaType="com.yc.project.entity.User">
+            <id column="u_id" property="id" />
+            <result column="u_name" property="name" />
+            <result column="u_realName" property="realname" />
+        </association>
+        <association  column="i_id"  property="item" javaType="com.yc.project.entity.Item">
+            <id column="i_id" property="id" />
+            <result column="i_name" property="name" />
+            <result column="i_type" property="type" />
+            <association  column="i_pid"  property="p_Item" javaType="com.yc.project.entity.Item">
+                <id column="i_pid" property="id" />
+                <result column="i_pname" property="name" />
+            </association>
+        </association>
+    </resultMap>
+
+
+</mapper>

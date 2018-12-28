@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="FMS">
+    <output-path>$PROJECT_DIR$/out/artifacts/FMS</output-path>
+    <root id="archive" name="FMS.war">
+      <element id="artifact" artifact-name="fms2" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/web/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

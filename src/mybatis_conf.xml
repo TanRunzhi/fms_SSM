@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<!-- 定义别名 -->
+	<typeAliases>
+		<!-- <typeAlias type="com.yc.user.User" alias="uu"/> -->
+		<!-- 定义包名(一般定义实体类包) -->
+		<package name="com.yc.project.entity"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="com/yc/project/dao/UserMapper.xml"/>
+		<mapper resource="com/yc/project/dao/ItemMapper.xml"/>
+		<mapper resource="com/yc/project/dao/AccountMapper.xml"/>
+	</mappers>
+	 
+</configuration>

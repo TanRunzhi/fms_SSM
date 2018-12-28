@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="fms2">
+    <output-path>$PROJECT_DIR$/out/artifacts/fms2</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="fms_idea_SSM" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="application_server_libraries" name="Tomcat 9.0.13" />
+          <element id="library" level="project" name="aopalliance" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="fms_idea_SSM/web/Web" />
+    </root>
+  </artifact>
+</component>

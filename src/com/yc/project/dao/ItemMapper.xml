@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.project.dao.ItemDao">
+	<!-- 定义SQL语句 -->
+
+	<resultMap id="itemResultMap" type="com.yc.project.entity.Item">
+		<id property="id" column="id"></id>
+		<result property="type" column="type"></result>
+		<result property="name" column="name"></result>
+		<association property="p_Item" column="pid" javaType="com.yc.project.entity.Item">
+			<id property="id" column="pid"></id>
+		</association>
+
+	</resultMap>
+
+</mapper>
