@@ -17,6 +17,9 @@ public class User {
 		this.id = id;
 		this.name = name;
 		this.realname = realname;
+
+
+
 		this.pwd = pwd;
 	}
 

@@ -56,4 +56,8 @@ public class ItemService{
 	private void update(Item item){
 		itemDao.update(item);
 	}
+
+	public List<Item> getParentItemsByType(int type){
+		return itemDao.getParentItemsByType(type);
+	}
 }

@@ -41,4 +41,20 @@ public class AccountService  {
         return accountDao.getAccountById(id);
     }
 
+    public void saveOrUpdate(Account account){
+        if(account.getId() == 0){
+            save(account);
+        }else{
+            update(account);
+        }
+    }
+
+    public int save(Account account){
+        return accountDao.save(account);
+    }
+
+    public void update(Account account){
+        accountDao.update(account);
+    }
+
 }

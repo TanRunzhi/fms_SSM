@@ -7,8 +7,8 @@ public class Account {
 	private Date date;//  date,
 	private double amount;// decimal(10,2),
 	private String remark;// varchar(100),
-	private User user;// int references users(id),
-	private Item item;// int references items(id)
+	private User user = new User();// int references users(id),
+	private Item item = new Item();// int references items(id)
 
 	public Account() {
 		super();

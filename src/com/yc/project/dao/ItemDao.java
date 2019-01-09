@@ -28,4 +28,7 @@ public interface ItemDao {
 
 	@Update("update items set type=#{type},name=#{name},pid=#{p_Item.id} where id = #{id}")
 	void update(Item item);
+
+	@Select("select id,type,name from items where flag = 1 and type = #{type} and (pid is null or pid = '') ")
+	List<Item> getParentItemsByType(int type);
 }

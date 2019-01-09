@@ -10,76 +10,76 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
 		<title>帐薄管理--添加</title>
-		<script src="${pageContext.request.contextPath}/js/jquery-3.0.0.min.js"></script>
-		<link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet" type="text/css">
-		<script src='${pageContext.request.contextPath}/common/date/date.js'></script>
-		<script language="JavaScript" type="text/JavaScript" src="${pageContext.request.contextPath}/js/common.js"></script>
+		<c:import url="../recourse.jsp" />
 		<script type="text/javascript">
 			function addProject() {
 				document.getElementsByName("frmAction")[0].submit();
 			}
 			$().ready(function() {
 				//在paymentType的下拉框注册onchange事件
-				$("select[name=paymentType]").change(function() {
+				$("#type").change(function() {
 					//选中的是第几个类型：收入，支出
 					//发送HTTP的请求，获得对应类型的子项目
 					//更新到子项目的下拉框中
-					if($("select[name=paymentType]").prop('value') == '1') {
-						$("select[name=father] option").remove();
-						$("select[name=son] option").remove();
-						$("select[name=father]").append("<option>" + '日常收支' + "</option>");
-						$("select[name=son]").append("<option>" + '发工资' + "</option>");
-					} else {
+                    $("select[id=type] option[value='']").remove();
+					// if($("select[id=type]").prop('value') == '1') {
+					// 	$("select[id=pid] option").remove();
+					// 	$("select[id=sid] option").remove();
+					// 	$("select[id=pid]").append("<option>" + '日常收支' + "</option>");
+					// 	$("select[id=sid]").append("<option>" + '发工资' + "</option>");
+					// } else {
 						$.ajax({
 							type: "POST",
-							url: "${pageContext.request.contextPath}/TypeServlet",
-							data: "type=" + this.selectedIndex,
+							url: "getFatherAccountByType",
+							data: "type=" + $("#type").val(),
 							success: function(arr) {
 								//更新到子项目下拉框中
 								//清空原有的选项
-								$("select[name=father] option").remove();
-								$("select[name=son] option").remove();
+								$("#pid option").remove();
+								$("#sid option").remove();
 								//增加新的选项
 								$.each(arr, function(i, ele) {
-									$("select[name=father]").append("<option>" + ele + "</option>");
+									$("#pid").append("<option value='"+ele.id+"'>" + ele.name + "</option>");
 								});
+                                changeSItems();
 							},
 							dataType: "json"
-
 						});
-					}
+					// }
 				});
 				//
 				//在paymentType的下拉框注册onchange事件
-				$("select[name=father]").change(function() {
+				$("select[id=pid]").change(function() {
 					//选中的是第几个类型：收入，支出
 					//发送HTTP的请求，获得对应类型的子项目
 					//更新到子项目的下拉框中
-						$.ajax({
-							type: "POST",
-							url: "${pageContext.request.contextPath}/DetailServlet",
-							data: "id=" + $("select[name=father]").prop('value'),
-							success: function(arr) {
-								//更新到子项目下拉框中
-								//清空原有的选项
-								$("select[name=son] option").remove();
-								//增加新的选项
-								$.each(arr, function(i, ele) {
-									$("select[name=son]").append("<option>" + ele + "</option>");
-								});
-							},
-							dataType: "json"
-						});
+                    changeSItems();
 				});
 				//
 			});
 
-			
+			function changeSItems(){
+                $.ajax({
+                    type: "POST",
+                    url: "getSonAccountByFatherAccount",
+                    data: "id=" + $("select[id=pid]").prop('value'),
+                    success: function(arr) {
+                        //更新到子项目下拉框中
+                        //清空原有的选项
+                        $("select[id=sid] option").remove();
+                        //增加新的选项
+                        $.each(arr, function(i, ele) {
+                            $("#sid").append("<option value='"+ele.id+"'>" + ele.name + "</option>");
+                        });
+                    },
+                    dataType: "json"
+                });
+            };
 		</script>
 	</head>
 
 	<body leftmargin="0" topmargin="0" onLoad="MM_preloadImages('${pageContext.request.contextPath}/images/login_10.gif','${pageContext.request.contextPath}/images/login_12.gif','${pageContext.request.contextPath}/images/login_09.gif','${pageContext.request.contextPath}/images/login_11.gif')">
-		<form name="frmAction" method="post" action="${pageContext.request.contextPath}/AccountAddServlet">
+		<form name="frmAction" method="post" action="save">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 				<tr>
 					<td height="32" align="left" valign="top" class="text006">
@@ -107,46 +107,57 @@
 							<tr align="center">
 								<td width="12%" height="35" align="right">收支类型</td>
 								<td width="88%" align="left">
-									<select class="inp001" name="item.type">
+									<select class="inp001" name="item.type" id="type">
+										<c:if test="${account.item.type != 1 && account.item.type != 2}"><option value="">请选择</option></c:if>
 										<option value="1"  <c:if test="${account.item.type == 1}">selected="selected"</c:if> >收入</option>
-										<option value="2"  <c:if test="${account.item.type == 1}">selected="selected"</c:if> >支出</option>
+										<option value="2"  <c:if test="${account.item.type == 2}">selected="selected"</c:if> >支出</option>
 									</select>
 								</td>
 							</tr>
 							<tr align="center" class="bg04">
 								<td width="12%" height="35" align="right">父项目</td>
 								<td width="88%" align="left">
-									<select class="inp001" name="item.p_Item.id">
+									<select class="inp001" name="item.p_Item.id" id="pid">
                                         <option>请选择收支类型</option>
-
+										<c:if test="${account.id != 0}" >
+											<c:forEach items="${pItems}" var="item" varStatus="vs">
+												<option value="${item.id}" <c:if test="${item.id == account.item.p_Item.id}" >selected="selected"</c:if> > ${item.name}</option>
+											</c:forEach>
+										</c:if>
 									</select>
 								</td>
 							</tr>
 							<tr align="center">
 								<td width="12%" height="35" align="right">子项目</td>
 								<td width="88%" align="left">
-									<select class="inp001" name="item.id">
+									<select class="inp001" name="item.id" id="sid">
                                         <option>请选择父项目</option>
-
+										<c:if test="${account.id != 0}" >
+											<c:forEach items="${cItems}" var="item" varStatus="vs">
+												<option value="${item.id}" <c:if test="${item.id == account.item.id}" >selected="selected"</c:if> >${item.name}</option>
+											</c:forEach>
+										</c:if>
 									</select>
 								</td>
 							</tr>
 							<tr align="center" class="bg04">
 								<td height="35" align="right">收支日期</td>
 								<td align="left">
-								<input id="date" name="date" type="text" class="inp001" value='${sdf.format(account.date)}' readonly="readonly"  onclick='changeDate()' ></td>
+								<input id="date" name="date" type="text" class="inp001 layui-input" value='${sdf.format(account.date)}' readonly="readonly" ></td>
 							</tr>
 							<tr align="center">
 								<td height="35" align="right">收支家庭成员</td>
 								<td align="left">
-									<select class="inp001" name="familyMember">
-
+									<select class="inp001" name="user.id">
+										<c:forEach items="${users}" var="user" varStatus="vs">
+											<option value="${user.id}" <c:if test="${user.id == account.user.id}" >selected="selected"</c:if> >${user.realname}</option>
+										</c:forEach>
 									</select>
 								</td>
 							</tr>
 							<tr align="center" class="bg04">
 								<td height="35" align="right">收支金额</td>
-								<td align="left"><input name="paymentAmount" type="text" class="inp001" value="${account.amount}"></td>
+								<td align="left"><input name="amount" type="text" class="inp001" value="${account.amount}" ></td>
 							</tr>
 							<tr align="center">
 								<td height="168" align="right" valign="top">
@@ -158,13 +169,15 @@
 						</table>
 						<table width="98%" border="0" cellpadding="0" cellspacing="0" class="bor001">
 							<tr>
+								<c:if test="${op != 'v'}">
 								<td width="11%" height="40" align="center">
 									<a onclick="addProject()" target="mainframe" onMouseOver="MM_swapImage('Image1','','${pageContext.request.contextPath}/images/index_12_1.gif',1)" onMouseOut="MM_swapImgRestore()" onMouseDown="MM_swapImage('Image1','','${pageContext.request.contextPath}/images/index_12_2.gif',1)" onMouseUp="MM_swapImage('Image1','','${pageContext.request.contextPath}/images/index_12_1.gif',1)">
 									<img src="${pageContext.request.contextPath}/images/index_12_0.gif" name="Image1" width="75" height="24" border="0" id="Image1">
 									</a>
                                 </td>
+								</c:if>
                                 <td width="11%" height="40" align="center">
-									<a href="${pageContext.request.contextPath}/AccountListServlet" target="mainframe" onMouseOver="MM_swapImage('Image2','','${pageContext.request.contextPath}/images/login_09.gif',1)" onMouseOut="MM_swapImgRestore()" onMouseDown="MM_swapImage('Image2','','${pageContext.request.contextPath}/images/login_11.gif',1)" onMouseUp="MM_swapImage('Image2','','${pageContext.request.contextPath}/images/login_09.gif',1)">
+									<a href="${pageContext.request.contextPath}/account/list" target="mainframe" onMouseOver="MM_swapImage('Image2','','${pageContext.request.contextPath}/images/login_09.gif',1)" onMouseOut="MM_swapImgRestore()" onMouseDown="MM_swapImage('Image2','','${pageContext.request.contextPath}/images/login_11.gif',1)" onMouseUp="MM_swapImage('Image2','','${pageContext.request.contextPath}/images/login_09.gif',1)">
 									<img src="${pageContext.request.contextPath}/images/login_07.gif" name="Image2" width="75" height="24" border="0" id="Image2">
 									</a>
 								</td>
@@ -176,9 +189,15 @@
 			</table>
 		</form>
         <script>
-            function changeDate(){
-                document.getElementById("date").value=selectDate()
-            }
+            layui.use('laydate', function(){
+                var laydate = layui.laydate;
+
+                //执行一个laydate实例
+                laydate.render({
+                    elem: '#date' //指定元素
+                });
+            });
+            <c:if test="${op == 'v'}"> $('input,select,textarea').attr('disabled','disabled') </c:if>
         </script>
 	</body>
 
